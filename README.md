@@ -1,5 +1,5 @@
 ## 仿微信侧滑返回库
-#### 实现思路参考自「[Slidr](https://github.com/r0adkll/Slidr)」和「[and_swipeback](https://github.com/r0adkll/Slidr)」
+#### 实现思路参考自「[Slidr](https://github.com/r0adkll/Slidr)」和「[and_swipeback](https://github.com/XBeats/and_swipeback)」
 
 ### 功能
 - 无需设置Activity主题透明
