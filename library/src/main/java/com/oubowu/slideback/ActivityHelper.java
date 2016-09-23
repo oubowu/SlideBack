@@ -51,6 +51,11 @@ public class ActivityHelper implements Application.ActivityLifecycleCallbacks {
 
     @Override
     public void onActivityDestroyed(Activity activity) {
+
+        if (mListener != null) {
+            mListener.onDestroy(activity);
+        }
+
         mActivityStack.remove(activity);
     }
 
@@ -72,6 +77,16 @@ public class ActivityHelper implements Application.ActivityLifecycleCallbacks {
         for (Activity activity : mActivityStack) {
             activity.finish();
         }
+    }
+
+    public void setOnActivityDestroyListener(OnActivityDestroyListener listener) {
+        mListener = listener;
+    }
+
+    private OnActivityDestroyListener mListener;
+
+    public interface OnActivityDestroyListener {
+        void onDestroy(Activity activity);
     }
 
 }

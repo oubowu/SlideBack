@@ -31,8 +31,8 @@ public class SecondActivity extends AppCompatActivity {
         mSlideBackLayout = SlideBackHelper.attach(
                 // 当前Activity
                 this,
-                // 上个Activity
-                MyApplication.getActivityHelper().getPreActivity(),
+                MyApplication.getActivityHelper(),
+                false,
                 // 参数的配置
                 new SlideConfig.Builder()
                         // 是否侧滑
@@ -47,9 +47,9 @@ public class SecondActivity extends AppCompatActivity {
                 // 滑动的监听
                 new OnSlideListenerAdapter() {
                     @Override
-                    public void onSlide(@FloatRange(from = 0.0,
+                    public void onSlide(View changedView, @FloatRange(from = 0.0,
                             to = 1.0) float percent) {
-                        super.onSlide(percent);
+                        super.onSlide(changedView, percent);
                     }
                 });
 

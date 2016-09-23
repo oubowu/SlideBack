@@ -11,7 +11,6 @@ import android.widget.FrameLayout;
 
 import com.oubowu.slideback.SlideConfig;
 import com.oubowu.slideback.callbak.OnSlideListener;
-import com.oubowu.slideback.callbak.OnViewChangeListener;
 
 /**
  * Created by Oubowu on 2016/9/22 0022 15:24.
@@ -229,14 +228,10 @@ public class SlideBackLayout extends FrameLayout {
                 mShadowView.setVisibility(VISIBLE);
             }
 
-            if (mOnViewChangeListener!=null){
-                mOnViewChangeListener.onStart();
-            }
-
             float percent = left * 1.0f / mScreenWidth;
 
             if (mOnSlideListener != null) {
-                mOnSlideListener.onSlide(percent);
+                mOnSlideListener.onSlide(SlideBackLayout.this,percent);
             }
 
             mCacheDrawView.setX(-mScreenWidth / 2 + percent * (mScreenWidth / 2));
@@ -280,17 +275,4 @@ public class SlideBackLayout extends FrameLayout {
         return mEdgeRangePercent;
     }
 
-    private OnViewChangeListener mOnViewChangeListener;
-
-    public void setOnViewChangeListener(OnViewChangeListener onViewChangeListener) {
-        mOnViewChangeListener = onViewChangeListener;
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        if (mOnViewChangeListener!=null){
-            mOnViewChangeListener.onEnd();
-        }
-    }
 }

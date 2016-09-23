@@ -39,8 +39,8 @@ public class ScrollActivity extends AppCompatActivity {
         mSlideBackLayout = SlideBackHelper.attach(
                 // 当前Activity
                 this,
-                // 上个Activity
-                MyApplication.getActivityHelper().getPreActivity(),
+                MyApplication.getActivityHelper(),
+                false,
                 // 参数的配置
                 new SlideConfig.Builder()
                         // 是否侧滑
