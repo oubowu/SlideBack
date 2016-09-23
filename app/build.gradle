@@ -31,4 +31,5 @@ dependencies {
     compile 'com.android.support:design:24.2.1'
     testCompile 'junit:junit:4.12'
     compile project(':library')
+    compile 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.1.3'
 }

@@ -1,0 +1,23 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.oubowu.slideback.demo.MainActivity">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/action_rv"
+            android:checked="true"
+            android:orderInCategory="100"
+            android:title="显示RecyclerView"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_nsv"
+            android:orderInCategory="100"
+            android:title="显示ScrollView"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_vp"
+            android:orderInCategory="100"
+            android:title="显示ViewPager"
+            app:showAsAction="never"/>
+    </group>
+</menu>

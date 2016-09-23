@@ -22,4 +22,14 @@
         android:foreground="?attr/selectableItemBackground"
         android:text="跳转侧滑页面"/>
 
+    <Button
+        android:onClick="jumpScroll"
+        android:layout_alignParentBottom="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="40dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:text="跳转带有滑动控件的页面"/>
+
 </RelativeLayout>
