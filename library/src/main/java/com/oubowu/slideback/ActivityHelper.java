@@ -79,13 +79,13 @@ public class ActivityHelper implements Application.ActivityLifecycleCallbacks {
         }
     }
 
-    public void setOnActivityDestroyListener(OnActivityDestroyListener listener) {
+    void setOnActivityDestroyListener(OnActivityDestroyListener listener) {
         mListener = listener;
     }
 
     private OnActivityDestroyListener mListener;
 
-    public interface OnActivityDestroyListener {
+    interface OnActivityDestroyListener {
         void onDestroy(Activity activity);
     }
 

@@ -47,7 +47,9 @@ public class SlideBackHelper {
         contentView.setBackground(decorView.getBackground());
         decorView.setBackground(null);
 
-        final Activity preActivity = helper.getPreActivity();
+        final ActivityHelper[] helpers = {helper};
+
+        final Activity preActivity = helpers[0].getPreActivity();
         final View preContentView = getContentView(preActivity);
 
         //        Log.e("TAG", "SlideBackHelper-53行-attach(): " + preContentView);
@@ -135,16 +137,20 @@ public class SlideBackHelper {
             }
         });
 
-        helper.setOnActivityDestroyListener(new ActivityHelper.OnActivityDestroyListener() {
+        helpers[0].setOnActivityDestroyListener(new ActivityHelper.OnActivityDestroyListener() {
             @Override
             public void onDestroy(Activity activity) {
                 Log.e("TAG", "SlideBackHelper-103行-onDestroy(): " + activity);
-                if (!fixOrientation && activity == curActivity && preActivity != null && preContentView.getParent() != getDecorView(preActivity)) {
-                    // 当前页面的内容页与之解绑
-                    ((ViewGroup) contentView.getParent()).removeView(contentView);
-                    ((ViewGroup) preContentView.getParent()).removeView(preContentView);
-                    preContentView.setVisibility(View.VISIBLE);
-                    getDecorView(preActivity).addView(preContentView);
+                if (activity == curActivity) {
+                    if (preActivity != null && preContentView.getParent() != getDecorView(preActivity)) {
+                        // 当前页面的内容页与之解绑
+                        ((ViewGroup) contentView.getParent()).removeView(contentView);
+                        ((ViewGroup) preContentView.getParent()).removeView(preContentView);
+                        preContentView.setVisibility(View.VISIBLE);
+                        getDecorView(preActivity).addView(preContentView);
+                    }
+                    helpers[0].setOnActivityDestroyListener(null);
+                    helpers[0] = null;
                 }
             }
         });
