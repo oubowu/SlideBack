@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.FloatRange;
 import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.widget.ViewDragHelper;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -231,7 +232,7 @@ public class SlideBackLayout extends FrameLayout {
             float percent = left * 1.0f / mScreenWidth;
 
             if (mOnSlideListener != null) {
-                mOnSlideListener.onSlide(SlideBackLayout.this,percent);
+                mOnSlideListener.onSlide(changedView,percent);
             }
 
             mCacheDrawView.setX(-mScreenWidth / 2 + percent * (mScreenWidth / 2));
@@ -275,4 +276,9 @@ public class SlideBackLayout extends FrameLayout {
         return mEdgeRangePercent;
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        Log.e("TAG","SlideBackLayout-281行-onDetachedFromWindow(): ");
+    }
 }
