@@ -39,7 +39,9 @@ public class ScrollActivity extends AppCompatActivity {
         mSlideBackLayout = SlideBackHelper.attach(
                 // 当前Activity
                 this,
+                // Activity栈管理工具
                 MyApplication.getActivityHelper(),
+                // 屏幕方向是否固定
                 false,
                 // 参数的配置
                 new SlideConfig.Builder()
@@ -144,6 +146,11 @@ public class ScrollActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.anim_none, R.anim.anim_slide_out);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

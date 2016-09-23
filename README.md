@@ -44,8 +44,10 @@
         mSlideBackLayout = SlideBackHelper.attach(
                 // 当前Activity
                 this,
-                // 上个Activity
-                MyApplication.getActivityHelper().getPreActivity(),
+                // Activity栈管理工具
+                MyApplication.getActivityHelper(),
+                // 屏幕方向不是固定
+                false,
                 // 参数的配置
                 new SlideConfig.Builder()
                         // 是否启用边缘侧滑
