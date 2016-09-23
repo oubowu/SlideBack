@@ -11,6 +11,7 @@ import android.widget.FrameLayout;
 
 import com.oubowu.slideback.SlideConfig;
 import com.oubowu.slideback.callbak.OnSlideListener;
+import com.oubowu.slideback.callbak.OnViewChangeListener;
 
 /**
  * Created by Oubowu on 2016/9/22 0022 15:24.
@@ -209,13 +210,6 @@ public class SlideBackLayout extends FrameLayout {
                     } else if (mContentView.getLeft() == mScreenWidth) {
                         // 2016/9/22 0022 结束Activity
                         if (mOnSlideListener != null) {
-                            //                            removeView(mContentView);
-                            //                            post(new Runnable() {
-                            //                                @Override
-                            //                                public void run() {
-                            //                                    mOnSlideListener.onClose();
-                            //                                }
-                            //                            });
                             mOnSlideListener.onClose();
                         }
                     }
@@ -233,6 +227,10 @@ public class SlideBackLayout extends FrameLayout {
                 mCacheDrawView.setVisibility(VISIBLE);
                 mCacheDrawView.drawCacheView(mPreContentView);
                 mShadowView.setVisibility(VISIBLE);
+            }
+
+            if (mOnViewChangeListener!=null){
+                mOnViewChangeListener.onStart();
             }
 
             float percent = left * 1.0f / mScreenWidth;
@@ -282,4 +280,17 @@ public class SlideBackLayout extends FrameLayout {
         return mEdgeRangePercent;
     }
 
+    private OnViewChangeListener mOnViewChangeListener;
+
+    public void setOnViewChangeListener(OnViewChangeListener onViewChangeListener) {
+        mOnViewChangeListener = onViewChangeListener;
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mOnViewChangeListener!=null){
+            mOnViewChangeListener.onEnd();
+        }
+    }
 }

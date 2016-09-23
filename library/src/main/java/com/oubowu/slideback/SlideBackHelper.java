@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.oubowu.slideback.callbak.OnSlideListener;
+import com.oubowu.slideback.callbak.OnViewChangeListener;
 import com.oubowu.slideback.widget.SlideBackLayout;
 
 /**
@@ -27,7 +28,17 @@ public class SlideBackHelper {
         return slideContentView != null ? slideContentView : view;
     }
 
-    public static SlideBackLayout attach(final Activity curActivity, Activity preActivity, SlideConfig config, final OnSlideListener listener) {
+    /**
+     * 附着Activity，实现侧滑
+     *
+     * @param curActivity    当前Activity
+     * @param preActivity    上个Activity
+     * @param fixOrientation 屏幕是否旋转，针对是否旋转两种方案实现侧滑
+     * @param config         参数配置
+     * @param listener       滑动的监听
+     * @return 处理侧滑的布局，提高方法动态设置滑动相关参数
+     */
+    public static SlideBackLayout attach(final Activity curActivity, final Activity preActivity, final boolean fixOrientation, SlideConfig config, final OnSlideListener listener) {
         final ViewGroup decorView = getDecorView(curActivity);
         final View contentView = decorView.getChildAt(0);
         decorView.removeViewAt(0);
@@ -36,7 +47,9 @@ public class SlideBackHelper {
         contentView.setBackground(decorView.getBackground());
         decorView.setBackground(null);
 
-        final SlideBackLayout slideBackLayout = new SlideBackLayout(curActivity, contentView, getContentView(preActivity), getDecorViewDrawable(preActivity), config,
+        final View preContentView = getContentView(preActivity);
+
+        final SlideBackLayout slideBackLayout = new SlideBackLayout(curActivity, contentView, preContentView, getDecorViewDrawable(preActivity), config,
                 new OnSlideListener() {
 
                     @Override
@@ -58,22 +71,30 @@ public class SlideBackHelper {
                         if (listener != null) {
                             listener.onClose();
                         }
-                        //                        decorView.removeViewAt(0);
-                        //                        contentView.setVisibility(View.INVISIBLE);
-                        //                        decorView.addView(contentView);
-                        //                        decorView.postDelayed(new Runnable() {
-                        //                            @Override
-                        //                            public void run() {
-                        //                                Log.e("TAG", "SlideBackHelper-67行-run(): " + "关闭页面");
-                        //                                curActivity.finish();
-                        //                                curActivity.overridePendingTransition(0, R.anim.anim_out_none);
-                        //                            }
-                        //                        }, 50);
                         // TODO: 2016/9/23 偶尔会黑屏一下，找不到原因很苦恼
                         curActivity.finish();
                         curActivity.overridePendingTransition(0, R.anim.anim_out_none);
                     }
                 });
+
+        slideBackLayout.setOnViewChangeListener(new OnViewChangeListener() {
+            @Override
+            public void onStart() {
+                if (!fixOrientation) {
+                    // 上个页面的内容页与之解绑
+                    getDecorView(preActivity).removeView(preContentView);
+                }
+            }
+
+            @Override
+            public void onEnd() {
+                if (!fixOrientation) {
+                    // 当前页面的内容页与之解绑
+                    slideBackLayout.removeView(preContentView);
+                }
+            }
+        });
+        slideBackLayout.addView(preContentView, 0);
         decorView.addView(slideBackLayout);
         return slideBackLayout;
     }
