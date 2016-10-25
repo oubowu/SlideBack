@@ -30,11 +30,11 @@ public class SecondActivity extends AppCompatActivity {
 
         mSlideBackLayout = SlideBackHelper.attach(
                 // 当前Activity
-                this,
-                MyApplication.getActivityHelper(),
-                false,
+                this, MyApplication.getActivityHelper(),
                 // 参数的配置
                 new SlideConfig.Builder()
+                        // 屏幕是否旋转
+                        .rotateScreen(true)
                         // 是否侧滑
                         .edgeOnly(false)
                         // 是否禁止侧滑
@@ -42,14 +42,13 @@ public class SecondActivity extends AppCompatActivity {
                         // 侧滑的响应阈值，0~1，对应屏幕宽度*percent
                         .edgePercent(0.1f)
                         // 关闭页面的阈值，0~1，对应屏幕宽度*percent
-                        .slideOutPercent(0.5f)
-                        .create(),
+                        .slideOutPercent(0.5f).create(),
                 // 滑动的监听
                 new OnSlideListenerAdapter() {
                     @Override
-                    public void onSlide(View changedView, @FloatRange(from = 0.0,
+                    public void onSlide(@FloatRange(from = 0.0,
                             to = 1.0) float percent) {
-                        super.onSlide(changedView, percent);
+                        super.onSlide(percent);
                     }
                 });
 
@@ -60,6 +59,10 @@ public class SecondActivity extends AppCompatActivity {
         mSbEdgeRange = (SeekBar) findViewById(R.id.sb_edge_range);
         mTvSlideOutRange = (TextView) findViewById(R.id.tv_slide_out_range);
         mSbSlideOutRange = (SeekBar) findViewById(R.id.sb_slide_out_range);
+
+        if (mSlideBackLayout == null) {
+            return;
+        }
 
         mSbEdgeRange.setOnSeekBarChangeListener(new OnSeekBarChangeListenerAdapter() {
             @Override
@@ -105,6 +108,7 @@ public class SecondActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        mSlideBackLayout.isComingToFinish();
         overridePendingTransition(R.anim.anim_none, R.anim.anim_slide_out);
     }
 

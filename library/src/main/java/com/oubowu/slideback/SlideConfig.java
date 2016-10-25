@@ -19,6 +19,8 @@ public class SlideConfig {
 
     private float mSlideOutVelocity;
 
+    private boolean mRotateScreen;
+
     public boolean isEdgeOnly() {
         return mEdgeOnly;
     }
@@ -39,6 +41,15 @@ public class SlideConfig {
         return mSlideOutVelocity;
     }
 
+    /**
+     * 屏幕是否旋转，针对是否旋转两种方案实现侧滑
+     *
+     * @return true为屏幕旋转，false为屏幕不旋转
+     */
+    public boolean isRotateScreen() {
+        return mRotateScreen;
+    }
+
     private SlideConfig() {
     }
 
@@ -48,6 +59,7 @@ public class SlideConfig {
         mEdgePercent = builder.edgePercent;
         mSlideOutPercent = builder.slideOutPercent;
         mSlideOutVelocity = builder.slideOutVelocity;
+        mRotateScreen = builder.rotateScreen;
     }
 
     public static class Builder {
@@ -63,6 +75,8 @@ public class SlideConfig {
         private float slideOutPercent = 0.1f;
 
         private float slideOutVelocity = 2000f;
+
+        private boolean rotateScreen = false;
 
         public Builder() {
         }
@@ -95,6 +109,16 @@ public class SlideConfig {
         public Builder slideOutPercent(@FloatRange(from = 0.0,
                 to = 1.0) float slideOutPercent) {
             this.slideOutPercent = slideOutPercent;
+            return this;
+        }
+
+        /**
+         * 屏幕是否旋转，针对是否旋转两种方案实现侧滑
+         *
+         * @return true为屏幕旋转，false为屏幕不旋转
+         */
+        public Builder rotateScreen(boolean rotateScreen) {
+            this.rotateScreen = rotateScreen;
             return this;
         }
 

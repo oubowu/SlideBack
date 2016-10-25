@@ -5,13 +5,13 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.FloatRange;
 import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.widget.ViewDragHelper;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.oubowu.slideback.SlideConfig;
-import com.oubowu.slideback.callbak.OnSlideListener;
+import com.oubowu.slideback.callbak.OnInternalSlideListener;
 
 /**
  * Created by Oubowu on 2016/9/22 0022 15:24.
@@ -19,6 +19,7 @@ import com.oubowu.slideback.callbak.OnSlideListener;
 public class SlideBackLayout extends FrameLayout {
 
     private static final int MIN_FLING_VELOCITY = 400;
+    private boolean mIsFirstAttachToWindow;
     private ViewDragHelper mDragHelper;
     private View mContentView;
     private CacheDrawView mCacheDrawView;
@@ -46,23 +47,26 @@ public class SlideBackLayout extends FrameLayout {
 
     private boolean mIsEdgeRangeInside;
 
-    private OnSlideListener mOnSlideListener;
+    private OnInternalSlideListener mOnInternalSlideListener;
 
     private float mDownX;
 
     private float mSlidDistantX;
 
-    public SlideBackLayout(Context context, View contentView, View preContentView, Drawable preDecorViewDrawable, SlideConfig config, OnSlideListener onSlideListener) {
+    private boolean mRotateScreen;
+
+    public SlideBackLayout(Context context, View contentView, View preContentView, Drawable preDecorViewDrawable, SlideConfig config, OnInternalSlideListener onInternalSlideListener) {
         super(context);
         mContentView = contentView;
         mPreContentView = preContentView;
         mPreDecorViewDrawable = preDecorViewDrawable;
-        mOnSlideListener = onSlideListener;
+        mOnInternalSlideListener = onInternalSlideListener;
 
-        init(config);
+        initConfig(config);
+
     }
 
-    private void init(SlideConfig config) {
+    private void initConfig(SlideConfig config) {
 
         if (config == null) {
             config = new SlideConfig.Builder().create();
@@ -82,24 +86,23 @@ public class SlideBackLayout extends FrameLayout {
 
         mCacheDrawView = new CacheDrawView(getContext());
         mCacheDrawView.setVisibility(INVISIBLE);
+        addView(mCacheDrawView);
 
         mShadowView = new ShadowView(getContext());
         mShadowView.setVisibility(INVISIBLE);
-
-        addView(mCacheDrawView);
         addView(mShadowView, mScreenWidth / 28, LayoutParams.MATCH_PARENT);
 
         addView(mContentView);
 
         mEdgeOnly = config.isEdgeOnly();
         mLock = config.isLock();
+        mRotateScreen = config.isRotateScreen();
 
         mSlideOutRangePercent = config.getSlideOutPercent();
         mEdgeRangePercent = config.getEdgePercent();
 
         mSlideOutRange = mScreenWidth * mSlideOutRangePercent;
         mEdgeRange = mScreenWidth * mEdgeRangePercent;
-
         mSlideOutVelocity = config.getSlideOutVelocity();
 
         mSlidDistantX = mScreenWidth / 20.0f;
@@ -128,7 +131,7 @@ public class SlideBackLayout extends FrameLayout {
         if (mEdgeOnly) {
             float x = event.getX();
             mIsEdgeRangeInside = isEdgeRangeInside(x);
-            return mIsEdgeRangeInside ? mDragHelper.shouldInterceptTouchEvent(event) : false;
+            return mIsEdgeRangeInside && mDragHelper.shouldInterceptTouchEvent(event);
         } else {
             return mDragHelper.shouldInterceptTouchEvent(event);
         }
@@ -146,7 +149,7 @@ public class SlideBackLayout extends FrameLayout {
             return super.onTouchEvent(event);
         }
 
-        if ((mEdgeOnly && mIsEdgeRangeInside) || !mEdgeOnly) {
+        if (!mEdgeOnly || mIsEdgeRangeInside) {
             mDragHelper.processTouchEvent(event);
         } else {
             return super.onTouchEvent(event);
@@ -158,6 +161,14 @@ public class SlideBackLayout extends FrameLayout {
     public void computeScroll() {
         if (mDragHelper.continueSettling(true)) {
             invalidate();
+        }
+    }
+
+    public void isComingToFinish() {
+        if (mOnInternalSlideListener != null && mRotateScreen) {
+            // 旋转屏幕的时候必调此方法，这里掉onClose目的是把preContentView给回上个Activity
+            mOnInternalSlideListener.onClose(false);
+            mPreContentView.setX(0);
         }
     }
 
@@ -204,13 +215,23 @@ public class SlideBackLayout extends FrameLayout {
                 case ViewDragHelper.STATE_IDLE:
                     if (mContentView.getLeft() == 0) {
                         // 2016/9/22 0022 回到原处
-                        if (mOnSlideListener != null) {
-                            mOnSlideListener.onOpen();
+                        if (mOnInternalSlideListener != null) {
+                            mOnInternalSlideListener.onOpen();
                         }
                     } else if (mContentView.getLeft() == mScreenWidth) {
                         // 2016/9/22 0022 结束Activity
-                        if (mOnSlideListener != null) {
-                            mOnSlideListener.onClose();
+                        if (mOnInternalSlideListener != null) {
+
+                            // 这里再绘制一次是因为在屏幕旋转的模式下，remove了preContentView后布局会重新调整
+                            if (mRotateScreen && mCacheDrawView.getVisibility() == INVISIBLE) {
+                                mCacheDrawView.setBackground(mPreDecorViewDrawable);
+                                mCacheDrawView.setVisibility(VISIBLE);
+                                mCacheDrawView.drawCacheView(mPreContentView);
+                                // Log.e("TAG", "这里再绘制一次是因为在屏幕旋转的模式下，remove了preContentView后布局会重新调整");
+                            }
+
+                            mOnInternalSlideListener.onClose(true);
+
                         }
                     }
                     break;
@@ -222,25 +243,37 @@ public class SlideBackLayout extends FrameLayout {
         @Override
         public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
 
-            if (mCacheDrawView.getVisibility() == INVISIBLE) {
+            if (!mRotateScreen && mCacheDrawView.getVisibility() == INVISIBLE) {
                 mCacheDrawView.setBackground(mPreDecorViewDrawable);
                 mCacheDrawView.setVisibility(VISIBLE);
                 mCacheDrawView.drawCacheView(mPreContentView);
                 mShadowView.setVisibility(VISIBLE);
+            } else if (mRotateScreen) {
+                if (mPreContentView.getParent() != SlideBackLayout.this) {
+                    // 上个页面的内容页与之解绑，添加到当前页面
+                    ((ViewGroup) mPreContentView.getParent()).removeView(mPreContentView);
+                    SlideBackLayout.this.addView(mPreContentView, 0);
+                }
+                mShadowView.setVisibility(VISIBLE);
             }
 
-            float percent = left * 1.0f / mScreenWidth;
+            final float percent = left * 1.0f / mScreenWidth;
 
-            if (mOnSlideListener != null) {
-                mOnSlideListener.onSlide(changedView,percent);
+            if (mOnInternalSlideListener != null) {
+                mOnInternalSlideListener.onSlide(percent);
             }
 
-            mCacheDrawView.setX(-mScreenWidth / 2 + percent * (mScreenWidth / 2));
+            if (mRotateScreen) {
+                // Log.e("TAG", "滑动上个页面");
+                mPreContentView.setX(-mScreenWidth / 2 + percent * (mScreenWidth / 2));
+            } else {
+                mCacheDrawView.setX(-mScreenWidth / 2 + percent * (mScreenWidth / 2));
+            }
             mShadowView.setX(mContentView.getX() - mShadowView.getWidth());
             mShadowView.redraw(1 - percent);
-
         }
     }
+
 
     public void edgeOnly(boolean edgeOnly) {
         mEdgeOnly = edgeOnly;
@@ -279,6 +312,23 @@ public class SlideBackLayout extends FrameLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Log.e("TAG","SlideBackLayout-281行-onDetachedFromWindow(): ");
+        if (mOnInternalSlideListener != null && mRotateScreen) {
+            // 1.旋转屏幕的时候必调此方法，这里掉onClose目的是把preContentView给回上个Activity
+            // 2.跳转到另外一个Activity，例如也是需要滑动的，这时候就需要取当前Activity的contentView，所以这里把preContentView给回上个Activity
+            mOnInternalSlideListener.onClose(false);
+        }
     }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (!mIsFirstAttachToWindow) {
+            mIsFirstAttachToWindow = true;
+        } else if (mRotateScreen && mPreContentView.getParent() != SlideBackLayout.this) {
+            // 从其他Activity返回来的时候，把mPreContentView添加到当前Activity
+            ((ViewGroup) mPreContentView.getParent()).removeView(mPreContentView);
+            SlideBackLayout.this.addView(mPreContentView, 0);
+        }
+    }
+
 }

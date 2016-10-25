@@ -7,6 +7,7 @@
 - 支持动态设置边缘响应和滑动关闭距离的阈值
 - 页面边缘附有阴影并随滑动距离而渐变
 - 优化了与RecyclerView、ViewPager等滑动控件手势冲突
+- 支持屏幕旋转
 
 ### 效果图
 ![Demo](/pic/demo.gif) 
@@ -46,31 +47,33 @@
                 this,
                 // Activity栈管理工具
                 MyApplication.getActivityHelper(),
-                // 屏幕方向不是固定
-                false,
                 // 参数的配置
                 new SlideConfig.Builder()
-                        // 是否启用边缘侧滑
+                        // 屏幕是否旋转
+                        .rotateScreen(true)
+                        // 是否侧滑
                         .edgeOnly(false)
                         // 是否禁止侧滑
                         .lock(false)
-                        // 边缘侧滑的响应阈值，0~1，对应屏幕宽度*percent
+                        // 侧滑的响应阈值，0~1，对应屏幕宽度*percent
                         .edgePercent(0.1f)
                         // 关闭页面的阈值，0~1，对应屏幕宽度*percent
-                        .slideOutPercent(0.5f)
-                        .create(),
+                        .slideOutPercent(0.5f).create(),
                 // 滑动的监听
-                new OnSlideListenerAdapter() {
-                    @Override
-                    public void onSlide(@FloatRange(from = 0.0,
-                            to = 1.0) float percent) {
-                        super.onSlide(percent);
-                    }
-                });
+                null);
                
         // 其它初始化
     }
-#### 3.SlideBackHelper.attach会返回处理侧滑的SlideBackLayout，可在适当时候动态控制侧滑几个参数
+    
+#### 3.如果开启了屏幕旋转，SlideBackLayout需要监听Activity的结束事件，例如这里的onBackPressed，所以你需要在调用结束事件的地方加上SlideBackLayout.isComingToFinish()
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        mSlideBackLayout.isCommingToFinish();
+        overridePendingTransition(R.anim.anim_none, R.anim.anim_slide_out);
+    }
+    
+#### 4.SlideBackHelper.attach会返回处理侧滑的SlideBackLayout，可在适当时候动态控制侧滑几个参数
 ```  
   // 是否启用边缘侧滑
   mSlideBackLayout.edgeOnly(boolean);
@@ -83,7 +86,7 @@
 ``` 
 
 ### 存在问题
-##### 偶尔侧滑回来会有一瞬间闪屏，原因不详，希望有大神告知>_<
+##### 旋转屏幕后上一个Activity的布局也会随之旋转，但是ToolBar比例还是维持旋转之前的比例，无从下手，希望有大神告知>_<
 
 #### License
 ```

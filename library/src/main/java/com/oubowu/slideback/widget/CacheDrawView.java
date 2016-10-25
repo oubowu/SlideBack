@@ -2,7 +2,6 @@ package com.oubowu.slideback.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.util.Log;
 import android.view.View;
 
 
@@ -25,15 +24,16 @@ public class CacheDrawView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         if (mCacheView != null) {
+            // canvas.drawColor(Color.YELLOW);
             mCacheView.draw(canvas);
-            Log.e("TAG", "CacheDrawView-29行-onDraw(): ");
+            // Log.e("TAG", "CacheDrawView-29行-onDraw(): ");
         }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Log.e("TAG", "CacheDrawView-37行-onDetachedFromWindow(): ");
+        // Log.e("TAG", "CacheDrawView-37行-onDetachedFromWindow(): ");
         mCacheView = null;
     }
 }

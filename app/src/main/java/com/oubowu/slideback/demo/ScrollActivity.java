@@ -41,10 +41,10 @@ public class ScrollActivity extends AppCompatActivity {
                 this,
                 // Activity栈管理工具
                 MyApplication.getActivityHelper(),
-                // 屏幕方向是否固定
-                false,
                 // 参数的配置
                 new SlideConfig.Builder()
+                        // 屏幕是否旋转
+                        .rotateScreen(true)
                         // 是否侧滑
                         .edgeOnly(false)
                         // 是否禁止侧滑
@@ -149,6 +149,7 @@ public class ScrollActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        mSlideBackLayout.isComingToFinish();
         overridePendingTransition(R.anim.anim_none, R.anim.anim_slide_out);
     }
 
