@@ -24,13 +24,13 @@
             android:name=".SecondActivity"
 
             android:label="@string/title_activity_second"
-            android:theme="@style/AppTheme.NoActionBar"><!--android:configChanges="orientation|screenSize|keyboardHidden"-->
+            android:theme="@style/AppTheme.NoActionBar.Second"><!--android:configChanges="orientation|screenSize|keyboardHidden"-->
         </activity>
         <activity
             android:name=".ScrollActivity"
 
             android:label="@string/title_activity_scroll"
-            android:theme="@style/AppTheme.NoActionBar"><!--android:configChanges="orientation|screenSize|keyboardHidden"-->
+            android:theme="@style/AppTheme.NoActionBar.Second"><!--android:configChanges="orientation|screenSize|keyboardHidden"-->
         </activity>
     </application>
 

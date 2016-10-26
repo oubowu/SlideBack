@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -43,9 +44,9 @@ public class SlideBackHelper {
         final View contentView = decorView.getChildAt(0);
         decorView.removeViewAt(0);
 
-        if (contentView.findViewById(android.R.id.content).getBackground() == null) {
-            contentView.findViewById(android.R.id.content).setBackground(decorView.getBackground());
-            // decorView.setBackground(null);
+        View content = contentView.findViewById(android.R.id.content);
+        if (content.getBackground() == null) {
+            content.setBackground(decorView.getBackground());
         }
 
         final ActivityHelper[] helpers = {helper};
@@ -53,14 +54,14 @@ public class SlideBackHelper {
         final Activity preActivity = helpers[0].getPreActivity();
         final View preContentView = getContentView(preActivity);
 
-        final Drawable preDecorViewDrawable = getDecorViewDrawable(preActivity);
-
-        if (preContentView.findViewById(android.R.id.content).getBackground() == null) {
-            preContentView.findViewById(android.R.id.content).setBackground(preDecorViewDrawable);
+        content = preContentView.findViewById(android.R.id.content);
+        Drawable preDecorViewDrawable = getDecorViewDrawable(preActivity);
+        if (content.getBackground() == null) {
+            content.setBackground(preDecorViewDrawable);
         }
 
         final SlideBackLayout slideBackLayout;
-        slideBackLayout = new SlideBackLayout(curActivity, contentView, preContentView, config, new OnInternalSlideListener() {
+        slideBackLayout = new SlideBackLayout(curActivity, contentView, preContentView, preDecorViewDrawable, config, new OnInternalSlideListener() {
 
             @Override
             public void onSlide(float percent) {
@@ -83,18 +84,19 @@ public class SlideBackHelper {
                 }
 
                 if (config != null && config.isRotateScreen()) {
-                    // 当前页面的内容页与之解绑
-                    // remove了preContentView后布局会重新调整，这时候contentView回到原处，所以要设不可见
+
                     if (finishActivity) {
+                        // remove了preContentView后布局会重新调整，这时候contentView回到原处，所以要设不可见
                         contentView.setVisibility(View.INVISIBLE);
-                        // Log.e("TAG", "滑动后关闭页面：这里把原先布局放回到上个Activity");
                     }
+
                     ((ViewGroup) preContentView.getParent()).removeView(preContentView);
+                    Log.e("TAG", "这里把原先布局放回到上个Activity");
                     getDecorView(preActivity).addView(preContentView);
+                    // preContentView.setVisibility(View.VISIBLE);
                 }
 
                 if (finishActivity) {
-                    // TODO: 2016/9/23 偶尔会黑屏一下，找不到原因很苦恼
                     curActivity.finish();
                     curActivity.overridePendingTransition(0, R.anim.anim_out_none);
                 }
@@ -113,6 +115,7 @@ public class SlideBackHelper {
                                 @Override
                                 public void run() {
                                     ((ViewGroup) preContentView.getParent()).removeView(preContentView);
+                                    // preContentView.setVisibility(View.VISIBLE);
                                     getDecorView(preActivity).addView(preContentView);
                                 }
                             });

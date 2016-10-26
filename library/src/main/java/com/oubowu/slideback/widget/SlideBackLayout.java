@@ -2,9 +2,11 @@ package com.oubowu.slideback.widget;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.FloatRange;
 import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.widget.ViewDragHelper;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +28,7 @@ public class SlideBackLayout extends FrameLayout {
     private ShadowView mShadowView;
     private SlideLeftCallback mSlideLeftCallback;
     private View mPreContentView;
+    private Drawable mPreDecorViewDrawable;
     private int mScreenWidth;
 
     private boolean mEdgeOnly = false;
@@ -56,13 +59,16 @@ public class SlideBackLayout extends FrameLayout {
 
     private boolean mIsClose;
 
-    public SlideBackLayout(Context context, View contentView, View preContentView, SlideConfig config, OnInternalSlideListener onInternalSlideListener) {
+    public SlideBackLayout(Context context, View contentView, View preContentView, Drawable preDecorViewDrawable, SlideConfig config, OnInternalSlideListener onInternalSlideListener) {
         super(context);
         mContentView = contentView;
         mPreContentView = preContentView;
+        mPreDecorViewDrawable = preDecorViewDrawable;
         mOnInternalSlideListener = onInternalSlideListener;
 
         initConfig(config);
+
+        Log.e("TAG", "SlideBackLayout-71行-SlideBackLayout(): 创建SlideBackLayout");
 
     }
 
@@ -224,13 +230,26 @@ public class SlideBackLayout extends FrameLayout {
 
                             // 这里再绘制一次是因为在屏幕旋转的模式下，remove了preContentView后布局会重新调整
                             if (mRotateScreen && mCacheDrawView.getVisibility() == INVISIBLE) {
+                                mCacheDrawView.setBackground(mPreDecorViewDrawable);
+                                mCacheDrawView.drawCacheView(mPreContentView);
                                 mCacheDrawView.setVisibility(VISIBLE);
-                                //                                mCacheDrawView.drawCacheView(mPreContentView);
-                                // Log.e("TAG", "这里再绘制一次是因为在屏幕旋转的模式下，remove了preContentView后布局会重新调整");
-                            }
+                                Log.e("TAG", "这里再绘制一次是因为在屏幕旋转的模式下，remove了preContentView后布局会重新调整");
 
-                            mIsClose = true;
-                            mOnInternalSlideListener.onClose(true);
+                                mIsClose = true;
+                                Log.e("TAG", "SlideBackLayout-245行-onDetachedFromWindow(): 通知移除");
+                                mOnInternalSlideListener.onClose(true);
+                                mPreContentView.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Log.e("TAG", "绘制绘制");
+                                        mCacheDrawView.setBackground(mPreDecorViewDrawable);
+                                        mCacheDrawView.drawCacheView(mPreContentView);
+                                    }
+                                }, 10);
+                            } else if (!mRotateScreen){
+                                mIsClose = true;
+                                mOnInternalSlideListener.onClose(true);
+                            }
 
                         }
                     }
@@ -244,17 +263,17 @@ public class SlideBackLayout extends FrameLayout {
         public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
 
             if (!mRotateScreen && mCacheDrawView.getVisibility() == INVISIBLE) {
-                mCacheDrawView.setVisibility(VISIBLE);
+                mCacheDrawView.setBackground(mPreDecorViewDrawable);
                 mCacheDrawView.drawCacheView(mPreContentView);
+                mCacheDrawView.setVisibility(VISIBLE);
                 mShadowView.setVisibility(VISIBLE);
             } else if (mRotateScreen) {
                 if (mPreContentView.getParent() != SlideBackLayout.this) {
                     // 上个页面的内容页与之解绑，添加到当前页面
                     ((ViewGroup) mPreContentView.getParent()).removeView(mPreContentView);
                     SlideBackLayout.this.addView(mPreContentView, 0);
+                    mShadowView.setVisibility(VISIBLE);
                 }
-                mCacheDrawView.drawCacheView(mPreContentView);
-                mShadowView.setVisibility(VISIBLE);
             }
 
             final float percent = left * 1.0f / mScreenWidth;
@@ -318,6 +337,7 @@ public class SlideBackLayout extends FrameLayout {
             if (mIsClose) {
                 mIsClose = false;
             } else {
+                Log.e("TAG", "SlideBackLayout-344行-onDetachedFromWindow(): 通知移除");
                 mOnInternalSlideListener.onClose(false);
             }
         }
