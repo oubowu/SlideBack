@@ -40,6 +40,9 @@ public class SlideBackHelper {
      * @return 处理侧滑的布局，提高方法动态设置滑动相关参数
      */
     public static SlideBackLayout attach(@NonNull final Activity curActivity, @NonNull final ActivityHelper helper, @Nullable final SlideConfig config, @Nullable final OnSlideListener listener) {
+
+        final ActivityHelper[] helpers = {helper};
+
         final ViewGroup decorView = getDecorView(curActivity);
         final View contentView = decorView.getChildAt(0);
         decorView.removeViewAt(0);
@@ -49,14 +52,10 @@ public class SlideBackHelper {
             content.setBackground(decorView.getBackground());
         }
 
-        final ActivityHelper[] helpers = {helper};
-
         final Activity preActivity = helpers[0].getPreActivity();
         final View preContentView = getContentView(preActivity);
-
-        content = preContentView.findViewById(android.R.id.content);
         Drawable preDecorViewDrawable = getDecorViewDrawable(preActivity);
-
+        content = preContentView.findViewById(android.R.id.content);
         if (content.getBackground() == null) {
             content.setBackground(preDecorViewDrawable);
         }
@@ -91,10 +90,13 @@ public class SlideBackHelper {
                         contentView.setVisibility(View.INVISIBLE);
                     }
 
-                    ((ViewGroup) preContentView.getParent()).removeView(preContentView);
-                    Log.e("TAG", "这里把原先布局放回到上个Activity");
-                    getDecorView(preActivity).addView(preContentView, 0);
-                    // preContentView.setVisibility(View.VISIBLE);
+                    if (preActivity != null && preContentView.getParent() != getDecorView(preActivity)) {
+                        Log.e("TAG", ((SlideBackLayout) preContentView.getParent()).getTestName() + "这里把欠人的布局放回到上个Activity");
+                        ((ViewGroup) preContentView.getParent()).removeView(preContentView);
+                        getDecorView(preActivity).addView(preContentView, 0);
+                    } else {
+                        Log.e("TAG", "这个页面你都没加过，还是在上一个那里，你没欠我");
+                    }
                 }
 
                 if (finishActivity) {
@@ -116,7 +118,6 @@ public class SlideBackHelper {
                                 @Override
                                 public void run() {
                                     ((ViewGroup) preContentView.getParent()).removeView(preContentView);
-                                    // preContentView.setVisibility(View.VISIBLE);
                                     getDecorView(preActivity).addView(preContentView, 0);
                                 }
                             });

@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import com.oubowu.slideback.SlideConfig;
 import com.oubowu.slideback.callbak.OnInternalSlideListener;
@@ -21,6 +22,7 @@ import com.oubowu.slideback.callbak.OnInternalSlideListener;
 public class SlideBackLayout extends FrameLayout {
 
     private static final int MIN_FLING_VELOCITY = 400;
+    private final String mTestName;
     private boolean mIsFirstAttachToWindow;
     private ViewDragHelper mDragHelper;
     private View mContentView;
@@ -58,6 +60,7 @@ public class SlideBackLayout extends FrameLayout {
     private boolean mRotateScreen;
 
     private boolean mIsClose;
+    private boolean mIsClose1;
 
     public SlideBackLayout(Context context, View contentView, View preContentView, Drawable preDecorViewDrawable, SlideConfig config, OnInternalSlideListener onInternalSlideListener) {
         super(context);
@@ -67,6 +70,13 @@ public class SlideBackLayout extends FrameLayout {
         mOnInternalSlideListener = onInternalSlideListener;
 
         initConfig(config);
+
+        if (preContentView instanceof LinearLayout) {
+            mTestName = "1号滑动";
+        } else {
+            mTestName = "2号滑动";
+        }
+        Log.e("TAG", "创建了: " + mTestName);
 
     }
 
@@ -112,6 +122,16 @@ public class SlideBackLayout extends FrameLayout {
         mSlidDistantX = mScreenWidth / 20.0f;
 
         mContentView.setFitsSystemWindows(false);
+
+        //        if (mRotateScreen) {
+        //            postDelayed(new Runnable() {
+        //                @Override
+        //                public void run() {
+        //                    addPreContentView();
+        //                }
+        //            }, 300);
+        //        }
+
     }
 
     @Override
@@ -160,6 +180,16 @@ public class SlideBackLayout extends FrameLayout {
             return super.onTouchEvent(event);
         }
         return true;
+    }
+
+    private void addPreContentView() {
+        if (mPreContentView.getParent() != SlideBackLayout.this) {
+            Log.e("TAG", mTestName + ": 我要把上个页面的内容页加到我这里啦！");
+            mPreContentView.setTag("no");
+            ((ViewGroup) mPreContentView.getParent()).removeView(mPreContentView);
+            SlideBackLayout.this.addView(mPreContentView, 0);
+            mShadowView.setVisibility(VISIBLE);
+        }
     }
 
     @Override
@@ -232,21 +262,22 @@ public class SlideBackLayout extends FrameLayout {
                                 mCacheDrawView.setBackground(mPreDecorViewDrawable);
                                 mCacheDrawView.drawCacheView(mPreContentView);
                                 mCacheDrawView.setVisibility(VISIBLE);
-                                Log.e("TAG", "这里再绘制一次是因为在屏幕旋转的模式下，remove了preContentView后布局会重新调整");
-
+                                Log.e("TAG", mTestName + ": 这里再绘制一次是因为在屏幕旋转的模式下，remove了preContentView后布局会重新调整");
                                 mIsClose = true;
-                                Log.e("TAG", "SlideBackLayout-245行-onDetachedFromWindow(): 通知移除");
+                                mIsClose1 = true;
+                                Log.e("TAG", mTestName + ": 滑动到尽头了这个界面要死了，把preContentView给回上个Activity");
+                                mPreContentView.setTag("no");
                                 mOnInternalSlideListener.onClose(true);
                                 mPreContentView.postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Log.e("TAG", "绘制绘制");
                                         mCacheDrawView.setBackground(mPreDecorViewDrawable);
                                         mCacheDrawView.drawCacheView(mPreContentView);
                                     }
                                 }, 10);
                             } else if (!mRotateScreen) {
                                 mIsClose = true;
+                                mIsClose1 = true;
                                 mOnInternalSlideListener.onClose(true);
                             }
 
@@ -265,14 +296,12 @@ public class SlideBackLayout extends FrameLayout {
                 mCacheDrawView.setBackground(mPreDecorViewDrawable);
                 mCacheDrawView.drawCacheView(mPreContentView);
                 mCacheDrawView.setVisibility(VISIBLE);
-                mShadowView.setVisibility(VISIBLE);
             } else if (mRotateScreen) {
-                if (mPreContentView.getParent() != SlideBackLayout.this) {
-                    // 上个页面的内容页与之解绑，添加到当前页面
-                    ((ViewGroup) mPreContentView.getParent()).removeView(mPreContentView);
-                    SlideBackLayout.this.addView(mPreContentView, 0);
-                    mShadowView.setVisibility(VISIBLE);
-                }
+                addPreContentView();
+            }
+
+            if (mShadowView.getVisibility() != VISIBLE) {
+                mShadowView.setVisibility(VISIBLE);
             }
 
             final float percent = left * 1.0f / mScreenWidth;
@@ -328,29 +357,72 @@ public class SlideBackLayout extends FrameLayout {
     }
 
     @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        if (mOnInternalSlideListener != null && mRotateScreen) {
-            // 1.旋转屏幕的时候必调此方法，这里掉onClose目的是把preContentView给回上个Activity
-            // 2.跳转到另外一个Activity，例如也是需要滑动的，这时候就需要取当前Activity的contentView，所以这里把preContentView给回上个Activity
-            if (mIsClose) {
-                mIsClose = false;
-            } else {
-                Log.e("TAG", "SlideBackLayout-344行-onDetachedFromWindow(): 通知移除");
-                mOnInternalSlideListener.onClose(false);
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        // Log.e("TAG", "onWindowFocusChanged(): " + this + " ; " + hasWindowFocus);
+
+        if (hasWindowFocus) {
+            // 当前页面
+            if (!mIsFirstAttachToWindow) {
+                mIsFirstAttachToWindow = true;
+                Log.e("TAG", mTestName + ": 第一次窗口取得焦点");
+
+                // Log.e("TAG", "SlideBackLayout-359行-onWindowFocusChanged(): " + mPreContentView);
+                //                if (mPreContentView instanceof SlideBackLayout) {
+                //                    SlideBackLayout backLayout = (SlideBackLayout) mPreContentView;
+                //                    for (int i = 0; i < backLayout.getChildCount(); i++) {
+                //                        Log.e("TAG", "SlideBackLayout孩子: " + backLayout.getChildAt(i));
+                //                    }
+                //                }
+            } else if (mRotateScreen && mPreContentView.getParent() != SlideBackLayout.this) {
+                // 从其他Activity返回来的时候，把mPreContentView添加到当前Activity
+                postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.e("TAG", mTestName + ": 从其他Activity返回来的时候，把mPreContentView添加到当前Activity ");
+                        ((ViewGroup) mPreContentView.getParent()).removeView(mPreContentView);
+                        SlideBackLayout.this.addView(mPreContentView, 0);
+                    }
+                }, 10);
+            }
+        } else {
+            if (mOnInternalSlideListener != null && mRotateScreen) {
+                // 1.跳转到另外一个Activity，例如也是需要滑动的，这时候就需要取当前Activity的contentView，所以这里把preContentView给回上个Activity
+                if (mIsClose) {
+                    mIsClose = false;
+                    Log.e("TAG", mTestName + ": onWindowFocusChanged前已经调了关闭");
+                } else {
+                    Log.e("TAG", mTestName + ": 跳转到另外一个Activity，取这个Activity的contentView前把preContentView给回上个Activity");
+                    mOnInternalSlideListener.onClose(false);
+                }
             }
         }
+
+    }
+
+    public String getTestName() {
+        return mTestName;
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        if (!mIsFirstAttachToWindow) {
-            mIsFirstAttachToWindow = true;
-        } else if (mRotateScreen && mPreContentView.getParent() != SlideBackLayout.this) {
-            // 从其他Activity返回来的时候，把mPreContentView添加到当前Activity
-            ((ViewGroup) mPreContentView.getParent()).removeView(mPreContentView);
-            SlideBackLayout.this.addView(mPreContentView, 0);
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        // Log.e("TAG", "SlideBackLayout-345行-onDetachedFromWindow(): " + this);
+        if (mOnInternalSlideListener != null && mRotateScreen) {
+            // 1.旋转屏幕的时候必调此方法，这里掉onClose目的是把preContentView给回上个Activity
+            if (mIsClose1) {
+                mIsClose1 = false;
+                Log.e("TAG", mTestName + ": onDetachedFromWindow(): " + "已经调了关闭");
+            } else {
+                if (getTag() != null && getTag() == "no") {
+                    // 说明是手动删的不关旋转屏幕的事，所以不处理
+                    Log.e("TAG", mTestName + ":说明是手动删的不关旋转屏幕的事，所以不处理");
+                    setTag(null);
+                } else {
+                    Log.e("TAG", mTestName + ":屏幕旋转了，重建界面: 把preContentView给回上个Activity");
+                    mOnInternalSlideListener.onClose(false);
+                }
+            }
         }
     }
 
@@ -358,7 +430,7 @@ public class SlideBackLayout extends FrameLayout {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mScreenWidth = getResources().getDisplayMetrics().widthPixels;
-        //        Log.e("TAG", "SlideBackLayout-338行-onConfigurationChanged(): " + mScreenWidth);
+        Log.e("TAG", mTestName + ": SlideBackLayout-338行-onConfigurationChanged(): " + mScreenWidth);
         ViewGroup.LayoutParams layoutParams = mShadowView.getLayoutParams();
         layoutParams.width = mScreenWidth / 28;
         layoutParams.height = LayoutParams.MATCH_PARENT;

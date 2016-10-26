@@ -11,9 +11,9 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-
+            android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"><!--android:configChanges="orientation|screenSize|keyboardHidden"-->
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -22,9 +22,9 @@
         </activity>
         <activity
             android:name=".SecondActivity"
-
+            android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/title_activity_second"
-            android:theme="@style/AppTheme.NoActionBar.Second"><!--android:configChanges="orientation|screenSize|keyboardHidden"-->
+            android:theme="@style/AppTheme.NoActionBar.Second">
         </activity>
         <activity
             android:name=".ScrollActivity"
