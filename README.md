@@ -11,6 +11,7 @@
 
 ### 效果图
 ![Demo](/pic/demo.gif) 
+![Demo](/pic/demo2.gif) 
 
 ### 使用方法
 #### 1. 继承Application实现Activity生命周期的监听，ActivityHelper用于保存Activity栈供侧滑库使用
