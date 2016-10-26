@@ -2,7 +2,6 @@ package com.oubowu.slideback.widget;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.FloatRange;
 import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.widget.ViewDragHelper;
@@ -27,7 +26,6 @@ public class SlideBackLayout extends FrameLayout {
     private ShadowView mShadowView;
     private SlideLeftCallback mSlideLeftCallback;
     private View mPreContentView;
-    private Drawable mPreDecorViewDrawable;
     private int mScreenWidth;
 
     private boolean mEdgeOnly = false;
@@ -56,11 +54,12 @@ public class SlideBackLayout extends FrameLayout {
 
     private boolean mRotateScreen;
 
-    public SlideBackLayout(Context context, View contentView, View preContentView, Drawable preDecorViewDrawable, SlideConfig config, OnInternalSlideListener onInternalSlideListener) {
+    private boolean mIsClose;
+
+    public SlideBackLayout(Context context, View contentView, View preContentView, SlideConfig config, OnInternalSlideListener onInternalSlideListener) {
         super(context);
         mContentView = contentView;
         mPreContentView = preContentView;
-        mPreDecorViewDrawable = preDecorViewDrawable;
         mOnInternalSlideListener = onInternalSlideListener;
 
         initConfig(config);
@@ -225,12 +224,12 @@ public class SlideBackLayout extends FrameLayout {
 
                             // 这里再绘制一次是因为在屏幕旋转的模式下，remove了preContentView后布局会重新调整
                             if (mRotateScreen && mCacheDrawView.getVisibility() == INVISIBLE) {
-                                mCacheDrawView.setBackground(mPreDecorViewDrawable);
                                 mCacheDrawView.setVisibility(VISIBLE);
-                                mCacheDrawView.drawCacheView(mPreContentView);
+                                //                                mCacheDrawView.drawCacheView(mPreContentView);
                                 // Log.e("TAG", "这里再绘制一次是因为在屏幕旋转的模式下，remove了preContentView后布局会重新调整");
                             }
 
+                            mIsClose = true;
                             mOnInternalSlideListener.onClose(true);
 
                         }
@@ -245,7 +244,6 @@ public class SlideBackLayout extends FrameLayout {
         public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
 
             if (!mRotateScreen && mCacheDrawView.getVisibility() == INVISIBLE) {
-                mCacheDrawView.setBackground(mPreDecorViewDrawable);
                 mCacheDrawView.setVisibility(VISIBLE);
                 mCacheDrawView.drawCacheView(mPreContentView);
                 mShadowView.setVisibility(VISIBLE);
@@ -255,6 +253,7 @@ public class SlideBackLayout extends FrameLayout {
                     ((ViewGroup) mPreContentView.getParent()).removeView(mPreContentView);
                     SlideBackLayout.this.addView(mPreContentView, 0);
                 }
+                mCacheDrawView.drawCacheView(mPreContentView);
                 mShadowView.setVisibility(VISIBLE);
             }
 
@@ -316,7 +315,11 @@ public class SlideBackLayout extends FrameLayout {
         if (mOnInternalSlideListener != null && mRotateScreen) {
             // 1.旋转屏幕的时候必调此方法，这里掉onClose目的是把preContentView给回上个Activity
             // 2.跳转到另外一个Activity，例如也是需要滑动的，这时候就需要取当前Activity的contentView，所以这里把preContentView给回上个Activity
-            mOnInternalSlideListener.onClose(false);
+            if (mIsClose) {
+                mIsClose = false;
+            } else {
+                mOnInternalSlideListener.onClose(false);
+            }
         }
     }
 

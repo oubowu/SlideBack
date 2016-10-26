@@ -43,8 +43,8 @@ public class SlideBackHelper {
         final View contentView = decorView.getChildAt(0);
         decorView.removeViewAt(0);
 
-        if (contentView.getBackground() == null) {
-            contentView.setBackground(decorView.getBackground());
+        if (contentView.findViewById(android.R.id.content).getBackground() == null) {
+            contentView.findViewById(android.R.id.content).setBackground(decorView.getBackground());
             // decorView.setBackground(null);
         }
 
@@ -53,8 +53,14 @@ public class SlideBackHelper {
         final Activity preActivity = helpers[0].getPreActivity();
         final View preContentView = getContentView(preActivity);
 
+        final Drawable preDecorViewDrawable = getDecorViewDrawable(preActivity);
+
+        if (preContentView.findViewById(android.R.id.content).getBackground() == null) {
+            preContentView.findViewById(android.R.id.content).setBackground(preDecorViewDrawable);
+        }
+
         final SlideBackLayout slideBackLayout;
-        slideBackLayout = new SlideBackLayout(curActivity, contentView, preContentView, getDecorViewDrawable(preActivity), config, new OnInternalSlideListener() {
+        slideBackLayout = new SlideBackLayout(curActivity, contentView, preContentView, config, new OnInternalSlideListener() {
 
             @Override
             public void onSlide(float percent) {
@@ -81,11 +87,10 @@ public class SlideBackHelper {
                     // remove了preContentView后布局会重新调整，这时候contentView回到原处，所以要设不可见
                     if (finishActivity) {
                         contentView.setVisibility(View.INVISIBLE);
+                        // Log.e("TAG", "滑动后关闭页面：这里把原先布局放回到上个Activity");
                     }
-                    // Log.e("TAG", "滑动后关闭页面：这里把原先布局放回到上个Activity");
                     ((ViewGroup) preContentView.getParent()).removeView(preContentView);
                     getDecorView(preActivity).addView(preContentView);
-                    preContentView.setVisibility(View.VISIBLE);
                 }
 
                 if (finishActivity) {
@@ -108,7 +113,6 @@ public class SlideBackHelper {
                                 @Override
                                 public void run() {
                                     ((ViewGroup) preContentView.getParent()).removeView(preContentView);
-                                    preContentView.setVisibility(View.VISIBLE);
                                     getDecorView(preActivity).addView(preContentView);
                                 }
                             });

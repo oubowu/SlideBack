@@ -24,16 +24,16 @@ public class CacheDrawView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         if (mCacheView != null) {
-            // canvas.drawColor(Color.YELLOW);
+            // canvas.drawColor(Color.BLACK);
             mCacheView.draw(canvas);
-            // Log.e("TAG", "CacheDrawView-29行-onDraw(): ");
+            //Log.e("TAG", "CacheDrawView-29行-onDraw(): ");
         }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        // Log.e("TAG", "CacheDrawView-37行-onDetachedFromWindow(): ");
+        //Log.e("TAG", "CacheDrawView-37行-onDetachedFromWindow(): ");
         mCacheView = null;
     }
 }
