@@ -56,6 +56,7 @@ public class SlideBackHelper {
 
         content = preContentView.findViewById(android.R.id.content);
         Drawable preDecorViewDrawable = getDecorViewDrawable(preActivity);
+
         if (content.getBackground() == null) {
             content.setBackground(preDecorViewDrawable);
         }
@@ -92,7 +93,7 @@ public class SlideBackHelper {
 
                     ((ViewGroup) preContentView.getParent()).removeView(preContentView);
                     Log.e("TAG", "这里把原先布局放回到上个Activity");
-                    getDecorView(preActivity).addView(preContentView);
+                    getDecorView(preActivity).addView(preContentView, 0);
                     // preContentView.setVisibility(View.VISIBLE);
                 }
 
@@ -116,7 +117,7 @@ public class SlideBackHelper {
                                 public void run() {
                                     ((ViewGroup) preContentView.getParent()).removeView(preContentView);
                                     // preContentView.setVisibility(View.VISIBLE);
-                                    getDecorView(preActivity).addView(preContentView);
+                                    getDecorView(preActivity).addView(preContentView, 0);
                                 }
                             });
                         }
