@@ -22,4 +22,8 @@
         <item name="android:windowBackground">@color/second</item>
     </style>
 
+    <style name="Third" parent="AppTheme.NoActionBar">
+        <item name="android:windowBackground">@color/second</item>
+    </style>
+
 </resources>

@@ -68,8 +68,6 @@ public class SlideBackLayout extends FrameLayout {
 
         initConfig(config);
 
-        Log.e("TAG", "SlideBackLayout-71行-SlideBackLayout(): 创建SlideBackLayout");
-
     }
 
     private void initConfig(SlideConfig config) {
@@ -113,6 +111,7 @@ public class SlideBackLayout extends FrameLayout {
 
         mSlidDistantX = mScreenWidth / 20.0f;
 
+        mContentView.setFitsSystemWindows(false);
     }
 
     @Override
@@ -246,7 +245,7 @@ public class SlideBackLayout extends FrameLayout {
                                         mCacheDrawView.drawCacheView(mPreContentView);
                                     }
                                 }, 10);
-                            } else if (!mRotateScreen){
+                            } else if (!mRotateScreen) {
                                 mIsClose = true;
                                 mOnInternalSlideListener.onClose(true);
                             }

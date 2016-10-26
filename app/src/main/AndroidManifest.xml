@@ -28,9 +28,8 @@
         </activity>
         <activity
             android:name=".ScrollActivity"
-
             android:label="@string/title_activity_scroll"
-            android:theme="@style/AppTheme.NoActionBar.Second"><!--android:configChanges="orientation|screenSize|keyboardHidden"-->
+            android:theme="@style/Third"><!--android:configChanges="orientation|screenSize|keyboardHidden"-->
         </activity>
     </application>
 
