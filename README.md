@@ -3,7 +3,7 @@
 
 ### 功能
 - 无需设置Activity主题透明
-- 支持动态切换全局或边缘侧滑，亦可动态禁止或恢复侧滑
+- 支持动态切换全局或边缘滑动，亦可动态禁止或恢复滑动
 - 支持动态设置边缘响应和滑动关闭距离的阈值
 - 页面边缘附有阴影并随滑动距离而渐变
 - 优化了与RecyclerView、ViewPager等滑动控件手势冲突
@@ -37,7 +37,7 @@
         }
         
     }
-#### 2.在需要侧滑的Activity使用SlideBackHelper去attach当前Activity
+#### 2.在需要滑动的Activity使用SlideBackHelper去attach当前Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +56,7 @@
                         .edgeOnly(false)
                         // 是否禁止侧滑
                         .lock(false)
-                        // 侧滑的响应阈值，0~1，对应屏幕宽度*percent
+                        // 边缘滑动的响应阈值，0~1，对应屏幕宽度*percent
                         .edgePercent(0.1f)
                         // 关闭页面的阈值，0~1，对应屏幕宽度*percent
                         .slideOutPercent(0.5f).create(),
@@ -76,11 +76,11 @@
     
 #### 4.SlideBackHelper.attach会返回处理侧滑的SlideBackLayout，可在适当时候动态控制侧滑几个参数
 ```  
-  // 是否启用边缘侧滑
+  // 是否启用边缘滑动
   mSlideBackLayout.edgeOnly(boolean);
-  // 是否禁止侧滑
+  // 是否禁止滑动
   mSlideBackLayout.lock(boolean);
-  // 设置边缘侧滑的响应阈值
+  // 设置边缘滑动的响应阈值
   mSlideBackLayout.setEdgeRangePercent(float);
   // 设置关闭页面的阈值
   mSlideBackLayout.setSlideOutRangePercent(float);

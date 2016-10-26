@@ -1,6 +1,7 @@
 package com.oubowu.slideback.widget;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.FloatRange;
 import android.support.v4.view.ViewGroupCompat;
@@ -329,6 +330,16 @@ public class SlideBackLayout extends FrameLayout {
             ((ViewGroup) mPreContentView.getParent()).removeView(mPreContentView);
             SlideBackLayout.this.addView(mPreContentView, 0);
         }
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mScreenWidth = getResources().getDisplayMetrics().widthPixels;
+        //        Log.e("TAG", "SlideBackLayout-338行-onConfigurationChanged(): " + mScreenWidth);
+        ViewGroup.LayoutParams layoutParams = mShadowView.getLayoutParams();
+        layoutParams.width = mScreenWidth / 28;
+        layoutParams.height = LayoutParams.MATCH_PARENT;
     }
 
 }

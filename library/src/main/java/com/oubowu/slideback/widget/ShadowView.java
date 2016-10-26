@@ -2,6 +2,7 @@ package com.oubowu.slideback.widget;
 
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
@@ -43,10 +44,15 @@ public class ShadowView extends View {
         }
     }
 
-    public void redraw(@FloatRange(from = 0.0,to = 1.0) float alphaPercent) {
+    public void redraw(@FloatRange(from = 0.0,
+            to = 1.0) float alphaPercent) {
         mAlphaPercent = alphaPercent;
         invalidate();
     }
 
-
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mLinearGradient = null;
+    }
 }
