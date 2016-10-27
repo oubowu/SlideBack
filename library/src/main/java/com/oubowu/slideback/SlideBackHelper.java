@@ -4,11 +4,10 @@ import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.oubowu.slideback.callbak.OnInternalSlideListener;
+import com.oubowu.slideback.callbak.OnInternalStateListener;
 import com.oubowu.slideback.callbak.OnSlideListener;
 import com.oubowu.slideback.widget.SlideBackLayout;
 
@@ -39,9 +38,8 @@ public class SlideBackHelper {
      * @param listener    滑动的监听
      * @return 处理侧滑的布局，提高方法动态设置滑动相关参数
      */
+    @Deprecated
     public static SlideBackLayout attach(@NonNull final Activity curActivity, @NonNull final ActivityHelper helper, @Nullable final SlideConfig config, @Nullable final OnSlideListener listener) {
-
-        final ActivityHelper[] helpers = {helper};
 
         final ViewGroup decorView = getDecorView(curActivity);
         final View contentView = decorView.getChildAt(0);
@@ -52,16 +50,16 @@ public class SlideBackHelper {
             content.setBackground(decorView.getBackground());
         }
 
-        final Activity preActivity = helpers[0].getPreActivity();
-        final View preContentView = getContentView(preActivity);
-        Drawable preDecorViewDrawable = getDecorViewDrawable(preActivity);
-        content = preContentView.findViewById(android.R.id.content);
+        final Activity[] preActivity = {helper.getPreActivity()};
+        final View[] preContentView = {getContentView(preActivity[0])};
+        Drawable preDecorViewDrawable = getDecorViewDrawable(preActivity[0]);
+        content = preContentView[0].findViewById(android.R.id.content);
         if (content.getBackground() == null) {
             content.setBackground(preDecorViewDrawable);
         }
 
         final SlideBackLayout slideBackLayout;
-        slideBackLayout = new SlideBackLayout(curActivity, contentView, preContentView, preDecorViewDrawable, config, new OnInternalSlideListener() {
+        slideBackLayout = new SlideBackLayout(curActivity, contentView, preContentView[0], preDecorViewDrawable, config, new OnInternalStateListener() {
 
             @Override
             public void onSlide(float percent) {
@@ -79,6 +77,11 @@ public class SlideBackHelper {
 
             @Override
             public void onClose(boolean finishActivity) {
+
+                if (listener != null) {
+                    listener.onClose();
+                }
+
                 if (!finishActivity && listener != null) {
                     listener.onClose();
                 }
@@ -90,13 +93,15 @@ public class SlideBackHelper {
                         contentView.setVisibility(View.INVISIBLE);
                     }
 
-                    if (preActivity != null && preContentView.getParent() != getDecorView(preActivity)) {
-                        Log.e("TAG", ((SlideBackLayout) preContentView.getParent()).getTestName() + "这里把欠人的布局放回到上个Activity");
-                        ((ViewGroup) preContentView.getParent()).removeView(preContentView);
-                        getDecorView(preActivity).addView(preContentView, 0);
-                    } else {
-                        Log.e("TAG", "这个页面你都没加过，还是在上一个那里，你没欠我");
+                    if (preActivity[0] != null && preContentView[0].getParent() != getDecorView(preActivity[0])) {
+                        // Log.e("TAG", ((SlideBackLayout) preContentView[0].getParent()).getTestName() + "这里把欠人的布局放回到上个Activity");
+                        preContentView[0].setX(0);
+                        ((ViewGroup) preContentView[0].getParent()).removeView(preContentView[0]);
+                        getDecorView(preActivity[0]).addView(preContentView[0], 0);
                     }
+                    //else {
+                    // Log.e("TAG", "这个页面你都没加过，还是在上一个那里，你没欠我");
+                    //}
                 }
 
                 if (finishActivity) {
@@ -104,30 +109,24 @@ public class SlideBackHelper {
                     curActivity.overridePendingTransition(0, R.anim.anim_out_none);
                 }
             }
+
+            @Override
+            public void onCheckPreActivity(SlideBackLayout slideBackLayout) {
+                // Log.e("TAG", "--------------------------------------------------");
+                // helper.printAllActivity();
+                // Log.e("TAG", "--------------------------------------------------");
+                Activity activity = helper.getPreActivity();
+                // Log.e("TAG", "SlideBackHelper-120行-onFocus(): " + preActivity[0] + ";" + activity);
+                if (activity != preActivity[0]) {
+                    // Log.e("TAG", "SlideBackHelper-122行-onFocus(): 上个Activity变了");
+                    preActivity[0] = activity;
+                    preContentView[0] = getContentView(preActivity[0]);
+                    slideBackLayout.updatePreContentView(preContentView[0]);
+                }
+            }
+
         });
 
-        if (config != null && config.isRotateScreen()) {
-            helpers[0].setOnActivityDestroyListener(new ActivityHelper.OnActivityDestroyListener() {
-                @Override
-                public void onDestroy(Activity activity) {
-                    if (activity == curActivity) {
-                        if (preActivity != null && preContentView.getParent() != getDecorView(preActivity)) {
-                            // 当前页面的内容页与之解绑
-                            preContentView.setX(0);
-                            preContentView.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    ((ViewGroup) preContentView.getParent()).removeView(preContentView);
-                                    getDecorView(preActivity).addView(preContentView, 0);
-                                }
-                            });
-                        }
-                        helpers[0].setOnActivityDestroyListener(null);
-                        helpers[0] = null;
-                    }
-                }
-            });
-        }
         decorView.addView(slideBackLayout);
 
         return slideBackLayout;

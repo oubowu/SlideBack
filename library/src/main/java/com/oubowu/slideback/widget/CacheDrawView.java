@@ -2,7 +2,6 @@ package com.oubowu.slideback.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.util.Log;
 import android.view.View;
 
 
@@ -27,7 +26,7 @@ public class CacheDrawView extends View {
         if (mCacheView != null) {
             //            canvas.drawColor(Color.YELLOW);
             mCacheView.draw(canvas);
-            Log.e("TAG", "绘制视图...");
+            // Log.e("TAG", "绘制上个Activity的内容视图...");
         }
     }
 

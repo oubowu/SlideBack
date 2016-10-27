@@ -52,6 +52,8 @@ public class SecondActivity extends AppCompatActivity {
                     }
                 });
 
+        // MyApplication.getActivityHelper().printAllActivity();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 

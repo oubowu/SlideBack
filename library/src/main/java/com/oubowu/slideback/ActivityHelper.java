@@ -3,6 +3,7 @@ package com.oubowu.slideback;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.util.Stack;
 
@@ -52,11 +53,12 @@ public class ActivityHelper implements Application.ActivityLifecycleCallbacks {
     @Override
     public void onActivityDestroyed(Activity activity) {
 
+        // Log.e("TAG", "ActivityHelper-销毁: " + activity);
+        mActivityStack.remove(activity);
+
         if (mListener != null) {
             mListener.onDestroy(activity);
         }
-
-        mActivityStack.remove(activity);
     }
 
     public Activity getPreActivity() {
@@ -79,12 +81,24 @@ public class ActivityHelper implements Application.ActivityLifecycleCallbacks {
         }
     }
 
+    public void printAllActivity() {
+        if (mActivityStack == null) {
+            return;
+        }
+        for (int i = 0; i < mActivityStack.size(); i++) {
+            Log.e("TAG", "位置" + i + ": " + mActivityStack.get(i));
+        }
+    }
+
+    @Deprecated
     void setOnActivityDestroyListener(OnActivityDestroyListener listener) {
         mListener = listener;
     }
 
+    @Deprecated
     private OnActivityDestroyListener mListener;
 
+    @Deprecated
     interface OnActivityDestroyListener {
         void onDestroy(Activity activity);
     }

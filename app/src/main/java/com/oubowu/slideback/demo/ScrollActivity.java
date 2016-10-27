@@ -56,6 +56,8 @@ public class ScrollActivity extends AppCompatActivity {
                 // 滑动的监听
                 null);
 
+        // MyApplication.getActivityHelper().printAllActivity();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
