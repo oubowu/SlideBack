@@ -7,7 +7,6 @@ import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.widget.ViewDragHelper;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -171,6 +170,12 @@ public class SlideBackLayout extends FrameLayout {
             if (!mEnableTouchEvent) {
                 return super.onTouchEvent(event);
             }
+            if (mCloseFlagForDetached || mCloseFlagForWindowFocus) {
+                // 针对快速滑动的时候，页面关闭的时候移除上个页面的时候，布局重新调整，这时候我们把contentView设为invisible，
+                // 但是还是可以响应DragHelper的处理，所以这里根据页面关闭的标志位不给处理事件了
+                // Log.e("TAG", mTestName + "都要死了，还处理什么触摸事件！！");
+                return super.onTouchEvent(event);
+            }
             mDragHelper.processTouchEvent(event);
         } else {
             return super.onTouchEvent(event);
@@ -269,6 +274,8 @@ public class SlideBackLayout extends FrameLayout {
                             mCloseFlagForWindowFocus = true;
                             mCloseFlagForDetached = true;
                             // Log.e("TAG", mTestName + ": 滑动到尽头了这个界面要死了，把preContentView给回上个Activity");
+                            // 这里setTag是因为下面的回调会把它移除出当前页面，这时候会触发它的onDetachedFromWindow事件，
+                            // 而它的onDetachedFromWindow实际上是来处理屏幕旋转的，所以设置个tag给它，让它知道是当前界面移除它的，并不是屏幕旋转导致的
                             mPreContentView.setTag("notScreenOrientationChange");
                             mOnInternalStateListener.onClose(true);
                             mPreContentView.postDelayed(new Runnable() {
@@ -380,24 +387,15 @@ public class SlideBackLayout extends FrameLayout {
 
             mEnableTouchEvent = true;
 
-            Log.e("TAG","SlideBackLayout-378行-onWindowFocusChanged(): "+hasWindowFocus);
+            //            Log.e("TAG", "SlideBackLayout-378行-onWindowFocusChanged(): " + hasWindowFocus);
 
             // 当前页面
             if (!mIsFirstAttachToWindow) {
                 mIsFirstAttachToWindow = true;
                 // Log.e("TAG", mTestName + ": 第一次窗口取得焦点");
-            }
-            //else if (mRotateScreen && mPreContentView.getParent() != SlideBackLayout.this) {
-            // 从其他Activity返回来的时候，把mPreContentView添加到当前Activity
-            //                postDelayed(new Runnable() {
-            //                    @Override
-            //                    public void run() {
-            //                        // Log.e("TAG", mTestName + ": 从其他Activity返回来的时候，把mPreContentView添加到当前Activity ");
-            //                        ((ViewGroup) mPreContentView.getParent()).removeView(mPreContentView);
-            //                        SlideBackLayout.this.addView(mPreContentView, 0);
-            //                    }
-            //                }, 10);
-            //}
+            } /*else if (mRotateScreen && mPreContentView.getParent() != SlideBackLayout.this) {
+                // Log.e("TAG", mTestName + ": 从其他Activity返回来了 ");
+            }*/
         } else {
             if (mRotateScreen) {
                 // 1.跳转到另外一个Activity，例如也是需要滑动的，这时候就需要取当前Activity的contentView，所以这里把preContentView给回上个Activity
