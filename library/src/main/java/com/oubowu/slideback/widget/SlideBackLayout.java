@@ -7,6 +7,7 @@ import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.widget.ViewDragHelper;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +30,6 @@ public class SlideBackLayout extends FrameLayout {
     private View mContentView;
     private CacheDrawView mCacheDrawView;
     private ShadowView mShadowView;
-    private SlideLeftCallback mSlideLeftCallback;
     private View mPreContentView;
     private Drawable mPreDecorViewDrawable;
     private int mScreenWidth;
@@ -62,7 +62,7 @@ public class SlideBackLayout extends FrameLayout {
 
     private boolean mCloseFlagForWindowFocus;
     private boolean mCloseFlagForDetached;
-    private boolean mIsPreContentViewChangeAndReload;
+    private boolean mEnableTouchEvent;
 
     public SlideBackLayout(Context context, View contentView, View preContentView, Drawable preDecorViewDrawable, SlideConfig config, @NonNull OnInternalStateListener onInternalStateListener) {
         super(context);
@@ -94,8 +94,8 @@ public class SlideBackLayout extends FrameLayout {
         final float minVel = MIN_FLING_VELOCITY * density;
 
         ViewGroupCompat.setMotionEventSplittingEnabled(this, false);
-        mSlideLeftCallback = new SlideLeftCallback();
-        mDragHelper = ViewDragHelper.create(this, 1.0f, mSlideLeftCallback);
+        SlideLeftCallback slideLeftCallback = new SlideLeftCallback();
+        mDragHelper = ViewDragHelper.create(this, 1.0f, slideLeftCallback);
         // 最小拖动速度
         mDragHelper.setMinVelocity(minVel);
         mDragHelper.setEdgeTrackingEnabled(ViewDragHelper.EDGE_LEFT);
@@ -168,6 +168,9 @@ public class SlideBackLayout extends FrameLayout {
         }
 
         if (!mEdgeOnly || mIsEdgeRangeInside) {
+            if (!mEnableTouchEvent) {
+                return super.onTouchEvent(event);
+            }
             mDragHelper.processTouchEvent(event);
         } else {
             return super.onTouchEvent(event);
@@ -200,10 +203,6 @@ public class SlideBackLayout extends FrameLayout {
             mPreContentView.setX(0);
         }
     }
-
-    //    public void setActivityHelper(ActivityHelper activityHelper) {
-    //        mActivityHelper = activityHelper;
-    //    }
 
     public String getTestName() {
         return mTestName;
@@ -378,6 +377,11 @@ public class SlideBackLayout extends FrameLayout {
         // // Log.e("TAG", "onWindowFocusChanged(): " + this + " ; " + hasWindowFocus);
 
         if (hasWindowFocus) {
+
+            mEnableTouchEvent = true;
+
+            Log.e("TAG","SlideBackLayout-378行-onWindowFocusChanged(): "+hasWindowFocus);
+
             // 当前页面
             if (!mIsFirstAttachToWindow) {
                 mIsFirstAttachToWindow = true;
@@ -412,6 +416,7 @@ public class SlideBackLayout extends FrameLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        mEnableTouchEvent = false;
         // // Log.e("TAG", "SlideBackLayout-345行-onDetachedFromWindow(): " + this);
         if (mRotateScreen) {
             // 1.旋转屏幕的时候必调此方法，这里掉onClose目的是把preContentView给回上个Activity
