@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -39,7 +38,6 @@ public class SlideBackHelper {
      * @param listener    滑动的监听
      * @return 处理侧滑的布局，提高方法动态设置滑动相关参数
      */
-    @Deprecated
     public static SlideBackLayout attach(@NonNull final Activity curActivity, @NonNull final ActivityHelper helper, @Nullable final SlideConfig config, @Nullable final OnSlideListener listener) {
 
         final ViewGroup decorView = getDecorView(curActivity);
@@ -77,19 +75,21 @@ public class SlideBackHelper {
             }
 
             @Override
-            public void onClose(boolean finishActivity) {
+            public void onClose(Boolean finishActivity) {
+
+                // finishActivity为true时关闭页面，为false时不关闭页面，为null时为其他地方关闭页面时调用SlideBackLayout.isComingToFinish的回调
 
                 if (listener != null) {
                     listener.onClose();
                 }
 
-                if (!finishActivity && listener != null) {
+                if ((finishActivity == null || !finishActivity) && listener != null) {
                     listener.onClose();
                 }
 
                 if (config != null && config.isRotateScreen()) {
 
-                    if (finishActivity) {
+                    if (finishActivity != null && finishActivity) {
                         // remove了preContentView后布局会重新调整，这时候contentView回到原处，所以要设不可见
                         contentView.setVisibility(View.INVISIBLE);
                     }
@@ -105,9 +105,12 @@ public class SlideBackHelper {
                     //}
                 }
 
-                if (finishActivity) {
+                if (finishActivity != null && finishActivity) {
                     curActivity.finish();
                     curActivity.overridePendingTransition(0, R.anim.anim_out_none);
+                    helper.postRemoveActivity(curActivity);
+                } else if (finishActivity == null) {
+                    helper.postRemoveActivity(curActivity);
                 }
             }
 

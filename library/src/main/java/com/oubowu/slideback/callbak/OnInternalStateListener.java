@@ -14,7 +14,7 @@ public interface OnInternalStateListener {
 
     void onOpen();
 
-    void onClose(boolean finishActivity);
+    void onClose(Boolean finishActivity);
 
     void onCheckPreActivity(SlideBackLayout slideBackLayout);
 

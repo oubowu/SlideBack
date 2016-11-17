@@ -213,7 +213,7 @@ public class SlideBackLayout extends FrameLayout {
         if (mRotateScreen) {
             mCloseFlagForDetached = true;
             mCloseFlagForWindowFocus = false;
-            mOnInternalStateListener.onClose(false);
+            mOnInternalStateListener.onClose(null);
             mPreContentView.setX(0);
         }
     }

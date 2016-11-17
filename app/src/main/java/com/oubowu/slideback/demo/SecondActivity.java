@@ -27,6 +27,8 @@ public class SecondActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
+        
+        // Log.e("TAG","SecondActivity-32行-onCreate(): ");
 
         mSlideBackLayout = SlideBackHelper.attach(
                 // 当前Activity

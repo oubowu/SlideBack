@@ -56,9 +56,6 @@ public class ActivityHelper implements Application.ActivityLifecycleCallbacks {
         // Log.e("TAG", "ActivityHelper-销毁: " + activity);
         mActivityStack.remove(activity);
 
-        if (mListener != null) {
-            mListener.onDestroy(activity);
-        }
     }
 
     public Activity getPreActivity() {
@@ -90,17 +87,15 @@ public class ActivityHelper implements Application.ActivityLifecycleCallbacks {
         }
     }
 
-    @Deprecated
-    void setOnActivityDestroyListener(OnActivityDestroyListener listener) {
-        mListener = listener;
-    }
-
-    @Deprecated
-    private OnActivityDestroyListener mListener;
-
-    @Deprecated
-    interface OnActivityDestroyListener {
-        void onDestroy(Activity activity);
+    /**
+     * 强制删掉activity，用于用户快速滑动页面的时候，因为页面还没来得及destroy导致的问题
+     *
+     * @param activity 删掉的activity
+     */
+    void postRemoveActivity(Activity activity) {
+        if (mActivityStack != null) {
+            mActivityStack.remove(activity);
+        }
     }
 
 }
