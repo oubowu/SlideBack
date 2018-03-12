@@ -22,7 +22,7 @@ import com.oubowu.slideback.callbak.OnInternalStateListener;
 public class SlideBackLayout extends FrameLayout {
 
     private static final int MIN_FLING_VELOCITY = 400;
-    private final String mTestName;
+    private String mTestName;
     private boolean mCheckPreContentView;
     private boolean mIsFirstAttachToWindow;
     private ViewDragHelper mDragHelper;
@@ -54,14 +54,18 @@ public class SlideBackLayout extends FrameLayout {
     private OnInternalStateListener mOnInternalStateListener;
 
     private float mDownX;
+    private float mDownY;
 
     private float mSlidDistantX;
 
     private boolean mRotateScreen;
-
     private boolean mCloseFlagForWindowFocus;
     private boolean mCloseFlagForDetached;
     private boolean mEnableTouchEvent;
+
+    public SlideBackLayout(@NonNull Context context) {
+        super(context);
+    }
 
     public SlideBackLayout(Context context, View contentView, View preContentView, Drawable preDecorViewDrawable, SlideConfig config, @NonNull OnInternalStateListener onInternalStateListener) {
         super(context);
@@ -141,9 +145,14 @@ public class SlideBackLayout extends FrameLayout {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mDownX = event.getX();
+                mDownY = event.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
                 // 优化侧滑的逻辑，不要一有稍微的滑动就被ViewDragHelper拦截掉了
+                // Log.e("SlideBackLayout",event.getY()+" "+mDownY+" "+mSlidDistantX);
+                if (Math.abs(event.getY() - mDownY) > mSlidDistantX){
+                    return false;
+                }
                 if (event.getX() - mDownX < mSlidDistantX) {
                     return false;
                 }

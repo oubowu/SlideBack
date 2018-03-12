@@ -40,6 +40,11 @@ public class SlideBackHelper {
      */
     public static SlideBackLayout attach(@NonNull final Activity curActivity, @NonNull final ActivityHelper helper, @Nullable final SlideConfig config, @Nullable final OnSlideListener listener) {
 
+        if (helper.getPreActivity()==null){
+            // 内存不足应用被杀的话，直接返回一个空实现的SlideBackLayout，这时候滑动功能就失效了
+            return new SlideBackLayout(curActivity);
+        }
+
         final ViewGroup decorView = getDecorView(curActivity);
         final View contentView = decorView.getChildAt(0);
         decorView.removeViewAt(0);
