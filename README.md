@@ -1,4 +1,4 @@
-## 高仿微信视差手势滑动返回库
+## 高仿微信视差手势滑动返回库（实验性质，请勿用于商业开发）
 #### 实现思路参考自「[Slidr](https://github.com/r0adkll/Slidr)」和「[and_swipeback](https://github.com/XBeats/and_swipeback)」
 
 ### 功能
